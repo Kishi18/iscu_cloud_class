@@ -75,7 +75,7 @@ export default function Home() {
         setError(data.error?.message || "요청 처리에 실패했습니다.");
         return;
       }
-
+ 
       setResult(data.shortUrl);
     } catch {
       setError("서버에 연결할 수 없습니다.");
@@ -87,7 +87,7 @@ export default function Home() {
       setTimeout(resolve, 800);
     });
 
-    setResult("입력값 검증이 완료되었습니다. 아직 Backend API와 연결되진 않았습니다.");
+    //setResult("입력값 검증이 완료되었습니다. 아직 Backend API와 연결되진 않았습니다.");
     setIsLoading(false);
   }
 
