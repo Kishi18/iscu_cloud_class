@@ -156,6 +156,44 @@ export async function POST(request) {
       );
     }
 
+    /*
+     * 5-1. 자기 서비스 도메인 단축 방지
+     */
+    const hostHeader = request.headers.get("host") || "";
+    const requestHost = hostHeader.split(":")[0].toLowerCase();
+    const targetHost = parsedUrl.hostname.toLowerCase();
+
+    if (requestHost && targetHost === requestHost) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "INVALID_URL",
+            message: "Self domain cannot be shortened.",
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    const baseUrl = new URL(request.url).origin;
+
+    /*
+     * 5-2. 동일 originalUrl 중복 처리
+     * 이미 등록된 URL인 경우 기존 shortCode 반환
+     */
+    const existing = await findUrlByOriginalUrl(originalUrl);
+    if (existing) {
+      const code = existing.short_code || existing.shortCode;
+      return NextResponse.json(
+        {
+          shortCode: code,
+          shortUrl: `${baseUrl}/${code}`,
+          originalUrl: existing.original_url || existing.originalUrl,
+        },
+        { status: 200 }
+      );
+    }
+
 
     /*
      * 6. Short URL 생성
@@ -167,7 +205,7 @@ export async function POST(request) {
 
     await saveUrl(shortCode, originalUrl);
 
-    const baseUrl = new URL(request.url).origin;
+    //const baseUrl = new URL(request.url).origin;
 
 
     /*
